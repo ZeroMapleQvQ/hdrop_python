@@ -12,4 +12,17 @@ This is the Python version of hdrop.
 
 
 ### Usage
+
+#### Install Requirements
+Using yay:
+```bash
+yay -S python-click python-i18n python-hyprpy
+```
+
+Using paru:
+```bash
+paru -S python-click python-i18n python-hyprpy
+```
+
+#### Get help information
 Have a look at the [README.md](https://github.com/hyprwm/contrib/blob/main/hdrop/README.md) of the original hdrop project for usage instructions.
