@@ -3,6 +3,7 @@
 This is the Python version of hdrop.
 
 ### Features
+ - [x] i18n support (en, zh_CN)
  - [x] floating mode
  - [x] focus mode
  - [x] set height and width
