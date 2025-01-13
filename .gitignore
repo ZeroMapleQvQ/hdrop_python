@@ -1,2 +1,7 @@
 *.yml
 test*
+
+# Pyinstaller
+main.spec
+build/
+dist/

@@ -1,3 +1,4 @@
+import time
 import click
 import i18n
 
@@ -62,6 +63,52 @@ def focus_mode(class_name):
         instance.dispatch(["focuswindow", f"class:{class_name}"])
 
 
+def handle_func(
+    command,
+    class_name,
+    focus_flag,
+    floating_flag,
+    height,
+    width,
+    center_flag,
+    skip_flag=False,
+):
+    if skip_flag is True:
+        instance.dispatch(["execr", command])
+        time.sleep(0.5)
+    if is_window_exists(class_name) is True:
+        if is_window_in_hdrop(class_name):
+            move_window_to_active_workspace(class_name)
+            if floating_flag is True:
+                instance.dispatch(["setprop", f"class:{class_name}", "noanim", "true"])
+                instance.dispatch(["setfloating", f"class:{class_name}"])
+                if center_flag is True:
+                    instance.dispatch(["centerwindow", f"class:{class_name}"])
+                if height is not None and width is not None:
+                    instance.dispatch(
+                        [
+                            "resizewindowpixel",
+                            f"exact {width}% {height}%,class:{class_name}",
+                        ]
+                    )
+                instance.dispatch(["setprop", f"class:{class_name}", "noanim", "false"])
+        elif focus_flag is True:
+            instance.dispatch(["focuswindow", f"class:{class_name}"])
+        else:
+            move_window_to_hdrop(class_name)
+    else:
+        handle_func(
+            command,
+            class_name,
+            focus_flag,
+            floating_flag,
+            height,
+            width,
+            center_flag,
+            skip_flag=True,
+        )
+
+
 @click.command()
 @click.option("--class", "-c", type=str, help=i18n.t("i18n.class_help"))
 @click.option("--focus", "-F", is_flag=True, help=i18n.t("i18n.focus_help"))
@@ -69,7 +116,7 @@ def focus_mode(class_name):
 @click.option("--height", "-h", type=int, help=i18n.t("i18n.height_help"))
 @click.option("--width", "-w", type=int, help=i18n.t("i18n.width_help"))
 @click.option("--center", "-C", is_flag=True, help=i18n.t("i18n.center_help"))
-@click.argument("command", nargs=1)
+@click.argument("command", nargs=1, type=str)
 def main(command, **kwargs):
     class_name = kwargs.get("class")
     focus_flag = kwargs.get("focus")
@@ -78,35 +125,10 @@ def main(command, **kwargs):
     width = kwargs.get("width")
     center_flag = kwargs.get("center")
     if class_name is not None:
-        if is_window_exists(class_name) is True:
-            if is_window_in_hdrop(class_name):
-                move_window_to_active_workspace(class_name)
-                if floating_flag is True:
-                    instance.dispatch(
-                        ["setprop", f"class:{class_name}", "noanim", "true"]
-                    )
-                    instance.dispatch(["setfloating", f"class:{class_name}"])
-                    if center_flag is True:
-                        instance.dispatch(["centerwindow", f"class:{class_name}"])
-                    if height is not None and width is not None:
-                        instance.dispatch(
-                            [
-                                "resizewindowpixel",
-                                f"exact {width}% {height}%,class:{class_name}",
-                            ]
-                        )
-                    instance.dispatch(
-                        ["setprop", f"class:{class_name}", "noanim", "false"]
-                    )
-            elif focus_flag is True:
-                instance.dispatch(["focuswindow", f"class:{class_name}"])
-            else:
-                move_window_to_hdrop(class_name)
-        else:
-            instance.dispatch(["execr", command])
-            main(class_name=class_name, focus=focus_flag, floating=floating_flag)
+        handle_func(
+            command, class_name, focus_flag, floating_flag, height, width, center_flag
+        )
 
 
 if __name__ == "__main__":
     main()
-    # switch_window_state("musicfox")
